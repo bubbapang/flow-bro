@@ -9,6 +9,7 @@ function App() {
   const [workActive, setWorkActive] = useState(false);
   const [playActive, setPlayActive] = useState(false);
   const [ratio, setRatio] = useState(5);
+  const [totalWorkTime, setTotalWorkTime] = useState(0);
 
   const alertSound = useRef(new Audio(`${process.env.PUBLIC_URL}/alert-sound.mp3`));
 
@@ -18,26 +19,47 @@ function App() {
 
       if (workActive) {
         const elapsed = Math.floor((currentTime - workStartTime) / 1000);
-        setWorkTime(elapsed);
-        setPlayTime(elapsed / ratio);
+        const newWorkTime = elapsed;
+        setWorkTime(newWorkTime);
+        setTotalWorkTime(newWorkTime);
+        setPlayTime(newWorkTime / ratio);
       }
 
       if (playActive) {
         const elapsed = Math.floor((currentTime - playStartTime) / 1000);
-        if (elapsed >= playTime) {
+        const newPlayTime = playTime - elapsed;
+        let newWorkTime = totalWorkTime - elapsed * ratio;
+
+        if (newPlayTime <= 0) {
           alertSound.current.play();
           setPlayActive(false);
+          setPlayTime(0); // Reset to 0 if it goes below
+        } else {
+          setPlayTime(newPlayTime);
         }
+
+        if (newWorkTime <= 0) {
+          setWorkTime(0); // Reset to 0 if it goes below
+          setTotalWorkTime(0);
+        } else {
+          setWorkTime(newWorkTime);
+          setTotalWorkTime(newWorkTime);
+        }
+
+        setPlayStartTime(currentTime); // Update playStartTime to the current time
       }
 
     }, 1000);
 
-    // This should be outside of setInterval
     return () => {
       clearInterval(interval);
     };
 
-  }, [workActive, playActive, workStartTime, playStartTime, playTime, ratio]);
+  }, [workActive, playActive, workStartTime, playStartTime, workTime, playTime, ratio, totalWorkTime]);
+
+  useEffect(() => {
+    setPlayTime(totalWorkTime / ratio);
+  }, [ratio, totalWorkTime]);
 
   const toggleWork = () => {
     setWorkStartTime(new Date().getTime() - workTime * 1000);
