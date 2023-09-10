@@ -55,20 +55,19 @@ function App() {
 
   return (
     <div className="App">
-      <div>
-        <h1>Work Time: {workTime}s</h1>
-        <button onClick={toggleWork}>{workActive ? "Pause" : "Start"}</button>
-      </div>
-      <div>
-        <h1>Play Time: {Math.floor(playTime)}s</h1> {/* Math.floor to avoid decimal points */}
-        <button onClick={togglePlay}>{playActive ? "Pause" : "Start"}</button>
-      </div>
+      {/* ... (rest of your components) */}
       <div>
         <h2>Work-to-Play Ratio</h2>
         <input
           type="number"
           value={ratio}
-          onChange={(e) => setRatio(Number(e.target.value))}
+          onChange={(e) => {
+            const newRatio = Number(e.target.value);
+            // Prevent ratio from being 0 or negative
+            if (newRatio > 0) {
+              setRatio(newRatio);
+            }
+          }}
         />
       </div>
     </div>
