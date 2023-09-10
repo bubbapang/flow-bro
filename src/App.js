@@ -6,7 +6,7 @@ function App() {
   const [playTime, setPlayTime] = useState(0);
   const [workActive, setWorkActive] = useState(false);
   const [playActive, setPlayActive] = useState(false);
-  const [ratio, setRatio] = useState(10); // For every 10 seconds of work, you get 1 second of play
+  const [ratio, setRatio] = useState(5); // For every 10 seconds of work, you get 1 second of play
 
   // Create a new Audio object
   const alertSound = new Audio(`${process.env.PUBLIC_URL}/alert-sound.mp3`);
@@ -24,7 +24,7 @@ function App() {
     if (playActive) {
       playInterval = setInterval(() => {
         setPlayTime((prev) => {
-          if (prev <= 0) {
+          if (prev < 1) {
             // Play the alert sound when playTime is up
             alertSound.play();
             setPlayActive(false); // Stop the play timer
