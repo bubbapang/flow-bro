@@ -55,7 +55,14 @@ function App() {
 
   return (
     <div className="App">
-      {/* ... (rest of your components) */}
+      <div>
+        <h1>Work Time: {workTime}s</h1>
+        <button onClick={toggleWork}>{workActive ? "Pause" : "Start"}</button>
+      </div>
+      <div>
+        <h1>Play Time: {Math.floor(playTime)}s</h1> {/* Math.floor to avoid decimal points */}
+        <button onClick={togglePlay}>{playActive ? "Pause" : "Start"}</button>
+      </div>
       <div>
         <h2>Work-to-Play Ratio</h2>
         <input
