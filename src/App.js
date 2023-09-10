@@ -1,53 +1,53 @@
-import React, { useState, useEffect } from "react";
-import "./App.css";
+import React, { useState, useEffect, useRef } from 'react';
+import './App.css';
 
 function App() {
+  const [workStartTime, setWorkStartTime] = useState(null);
+  const [playStartTime, setPlayStartTime] = useState(null);
   const [workTime, setWorkTime] = useState(0);
   const [playTime, setPlayTime] = useState(0);
   const [workActive, setWorkActive] = useState(false);
   const [playActive, setPlayActive] = useState(false);
-  const [ratio, setRatio] = useState(5); // For every 10 seconds of work, you get 1 second of play
+  const [ratio, setRatio] = useState(5);
 
-  // Create a new Audio object
-  const alertSound = new Audio(`${process.env.PUBLIC_URL}/alert-sound.mp3`);
+  const alertSound = useRef(new Audio(`${process.env.PUBLIC_URL}/alert-sound.mp3`));
 
   useEffect(() => {
-    let workInterval, playInterval;
+    const interval = setInterval(() => {
+      const currentTime = new Date().getTime();
 
-    if (workActive) {
-      workInterval = setInterval(() => {
-        setWorkTime((prev) => prev + 1);
-        setPlayTime((prev) => prev + 1 / ratio);  // use the ratio here
-      }, 1000);
-    }
+      if (workActive) {
+        const elapsed = Math.floor((currentTime - workStartTime) / 1000);
+        setWorkTime(elapsed);
+        setPlayTime(elapsed / ratio);
+      }
 
-    if (playActive) {
-      playInterval = setInterval(() => {
-        setPlayTime((prev) => {
-          if (prev < 1) {
-            // Play the alert sound when playTime is up
-            alertSound.play();
-            setPlayActive(false); // Stop the play timer
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
+      if (playActive) {
+        const elapsed = Math.floor((currentTime - playStartTime) / 1000);
+        if (elapsed >= playTime) {
+          alertSound.current.play();
+          setPlayActive(false);
+        }
+      }
 
+    }, 1000);
+
+    // This should be outside of setInterval
     return () => {
-      clearInterval(workInterval);
-      clearInterval(playInterval);
+      clearInterval(interval);
     };
-  }, [workActive, playActive, ratio]);
+
+  }, [workActive, playActive, workStartTime, playStartTime, playTime, ratio]);
 
   const toggleWork = () => {
+    setWorkStartTime(new Date().getTime() - workTime * 1000);
     setWorkActive(!workActive);
     setPlayActive(false);
   };
 
   const togglePlay = () => {
     if (playTime > 0) {
+      setPlayStartTime(new Date().getTime());
       setPlayActive(!playActive);
       setWorkActive(false);
     }
@@ -60,7 +60,7 @@ function App() {
         <button onClick={toggleWork}>{workActive ? "Pause" : "Start"}</button>
       </div>
       <div>
-        <h1>Play Time: {Math.floor(playTime)}s</h1> {/* Math.floor to avoid decimal points */}
+        <h1>Play Time: {Math.floor(playTime)}s</h1>
         <button onClick={togglePlay}>{playActive ? "Pause" : "Start"}</button>
       </div>
       <div>
@@ -70,7 +70,6 @@ function App() {
           value={ratio}
           onChange={(e) => {
             const newRatio = Number(e.target.value);
-            // Prevent ratio from being 0 or negative
             if (newRatio > 0) {
               setRatio(newRatio);
             }
