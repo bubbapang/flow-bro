@@ -2,14 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 function App() {
-  const [workStartTime, setWorkStartTime] = useState(null);
-  const [playStartTime, setPlayStartTime] = useState(null);
-  const [workTime, setWorkTime] = useState(0);
-  const [playTime, setPlayTime] = useState(0);
-  const [workActive, setWorkActive] = useState(false);
-  const [playActive, setPlayActive] = useState(false);
+  const [flowStartTime, setFlowStartTime] = useState(null);
+  const [restStartTime, setrestStartTime] = useState(null);
+  const [FlowTime, setFlowTime] = useState(0);
+  const [restTime, setRestTime] = useState(0);
+  const [flowActive, setFlowActive] = useState(false);
+  const [restActive, setRestActive] = useState(false);
   const [ratio, setRatio] = useState(5);
-  const [totalWorkTime, setTotalWorkTime] = useState(0);
+  const [totalFlowTime, setTotalFlowTime] = useState(0);
 
   const alertSound = useRef(new Audio(`${process.env.PUBLIC_URL}/alert-sound.mp3`));
 
@@ -17,36 +17,36 @@ function App() {
     const interval = setInterval(() => {
       const currentTime = new Date().getTime();
 
-      if (workActive) {
-        const elapsed = Math.floor((currentTime - workStartTime) / 1000);
-        const newWorkTime = elapsed;
-        setWorkTime(newWorkTime);
-        setTotalWorkTime(newWorkTime);
-        setPlayTime(newWorkTime / ratio);
+      if (flowActive) {
+        const elapsed = Math.floor((currentTime - flowStartTime) / 1000);
+        const newFlowTime = elapsed;
+        setFlowTime(newFlowTime);
+        setTotalFlowTime(newFlowTime);
+        setRestTime(newFlowTime / ratio);
       }
 
-      if (playActive) {
-        const elapsed = Math.floor((currentTime - playStartTime) / 1000);
-        const newPlayTime = playTime - elapsed;
-        let newWorkTime = totalWorkTime - elapsed * ratio;
+      if (restActive) {
+        const elapsed = Math.floor((currentTime - restStartTime) / 1000);
+        const newRestTime = restTime - elapsed;
+        let newFlowTime = totalFlowTime - elapsed * ratio;
 
-        if (newPlayTime <= 0) {
+        if (newRestTime <= 0) {
           alertSound.current.play();
-          setPlayActive(false);
-          setPlayTime(0); // Reset to 0 if it goes below
+          setRestActive(false);
+          setRestTime(0); // Reset to 0 if it goes below
         } else {
-          setPlayTime(newPlayTime);
+          setRestTime(newRestTime);
         }
 
-        if (newWorkTime <= 0) {
-          setWorkTime(0); // Reset to 0 if it goes below
-          setTotalWorkTime(0);
+        if (newFlowTime <= 0) {
+          setFlowTime(0); // Reset to 0 if it goes below
+          setTotalFlowTime(0);
         } else {
-          setWorkTime(newWorkTime);
-          setTotalWorkTime(newWorkTime);
+          setFlowTime(newFlowTime);
+          setTotalFlowTime(newFlowTime);
         }
 
-        setPlayStartTime(currentTime); // Update playStartTime to the current time
+        setrestStartTime(currentTime); // Update restStartTime to the current time
       }
 
     }, 1000);
@@ -55,38 +55,38 @@ function App() {
       clearInterval(interval);
     };
 
-  }, [workActive, playActive, workStartTime, playStartTime, workTime, playTime, ratio, totalWorkTime]);
+  }, [flowActive, restActive, flowStartTime, restStartTime, FlowTime, restTime, ratio, totalFlowTime]);
 
   useEffect(() => {
-    setPlayTime(totalWorkTime / ratio);
-  }, [ratio, totalWorkTime]);
+    setRestTime(totalFlowTime / ratio);
+  }, [ratio, totalFlowTime]);
 
-  const toggleWork = () => {
-    setWorkStartTime(new Date().getTime() - workTime * 1000);
-    setWorkActive(!workActive);
-    setPlayActive(false);
+  const toggleflow = () => {
+    setFlowStartTime(new Date().getTime() - FlowTime * 1000);
+    setFlowActive(!flowActive);
+    setRestActive(false);
   };
 
-  const togglePlay = () => {
-    if (playTime > 0) {
-      setPlayStartTime(new Date().getTime());
-      setPlayActive(!playActive);
-      setWorkActive(false);
+  const toggleRest = () => {
+    if (restTime > 0) {
+      setrestStartTime(new Date().getTime());
+      setRestActive(!restActive);
+      setFlowActive(false);
     }
   };
 
   return (
     <div className="App">
       <div>
-        <h1>Work Time: {workTime}s</h1>
-        <button onClick={toggleWork}>{workActive ? "Pause" : "Start"}</button>
+        <h1>Flow Time: {FlowTime}s</h1>
+        <button onClick={toggleflow}>{flowActive ? "Pause" : "Start"}</button>
       </div>
       <div>
-        <h1>Play Time: {Math.floor(playTime)}s</h1>
-        <button onClick={togglePlay}>{playActive ? "Pause" : "Start"}</button>
+        <h1>Rest Time: {Math.floor(restTime)}s</h1>
+        <button onClick={toggleRest}>{restActive ? "Pause" : "Start"}</button>
       </div>
       <div>
-        <h2>Work-to-Play Ratio</h2>
+        <h2>Flow-to-Rest Ratio</h2>
         <input
           type="number"
           value={ratio}
