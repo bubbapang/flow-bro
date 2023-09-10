@@ -24,9 +24,21 @@ function App() {
 
       if (playActive) {
         const elapsed = Math.floor((currentTime - playStartTime) / 1000);
-        if (elapsed >= playTime) {
+        const newPlayTime = playTime - elapsed;
+        let newWorkTime = workTime - elapsed * ratio; // decrement workTime in proportion to the ratio
+
+        if (newPlayTime <= 0) {
           alertSound.current.play();
           setPlayActive(false);
+          setPlayTime(0); // Reset to 0 if it goes below
+        } else {
+          setPlayTime(newPlayTime);
+        }
+
+        if (newWorkTime <= 0) {
+          setWorkTime(0); // Reset to 0 if it goes below
+        } else {
+          setWorkTime(newWorkTime);
         }
       }
 
@@ -37,7 +49,7 @@ function App() {
       clearInterval(interval);
     };
 
-  }, [workActive, playActive, workStartTime, playStartTime, playTime, ratio]);
+  }, [workActive, playActive, workStartTime, playStartTime, workTime, playTime, ratio]);
 
   const toggleWork = () => {
     setWorkStartTime(new Date().getTime() - workTime * 1000);
