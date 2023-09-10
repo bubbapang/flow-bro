@@ -8,6 +8,9 @@ function App() {
   const [playActive, setPlayActive] = useState(false);
   const [ratio, setRatio] = useState(10); // For every 10 seconds of work, you get 1 second of play
 
+  // Create a new Audio object
+  const alertSound = new Audio(`${process.env.PUBLIC_URL}/alert-sound.mp3`);
+
   useEffect(() => {
     let workInterval, playInterval;
 
@@ -20,7 +23,15 @@ function App() {
 
     if (playActive) {
       playInterval = setInterval(() => {
-        setPlayTime((prev) => prev - 1);
+        setPlayTime((prev) => {
+          if (prev <= 0) {
+            // Play the alert sound when playTime is up
+            alertSound.play();
+            setPlayActive(false); // Stop the play timer
+            return 0;
+          }
+          return prev - 1;
+        });
       }, 1000);
     }
 
@@ -28,7 +39,7 @@ function App() {
       clearInterval(workInterval);
       clearInterval(playInterval);
     };
-  }, [workActive, playActive, ratio]); // Add ratio to dependency list
+  }, [workActive, playActive, ratio]);
 
   const toggleWork = () => {
     setWorkActive(!workActive);
